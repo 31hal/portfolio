@@ -1,0 +1,29 @@
+---
+import Base from '../layouts/Base.astro';
+import music from '../data/music.json';
+// URLに XXXX が残っている間は、プレイヤーを出さずに曲名とコメントだけ表示します。
+const ok = (u: string) => u && !u.includes('XXXX');
+---
+<Base title="Music">
+  <main class="page">
+    <h1 class="title">Music</h1>
+    <ul>
+      {music.map((m) => (
+        <li>
+          <h2>{m.title}</h2>
+          <p>{m.comment}</p>
+          {ok(m.spotify) && <iframe src={m.spotify} height="152" loading="lazy" allow="encrypted-media" title={m.title}></iframe>}
+          {ok(m.soundcloud) && <iframe src={m.soundcloud} height="166" loading="lazy" title={m.title}></iframe>}
+        </li>
+      ))}
+    </ul>
+  </main>
+</Base>
+
+<style>
+  ul { list-style: none; padding: 0; }
+  li { padding: 1.25rem 0; border-top: 1px solid var(--line); }
+  h2 { font-size: 1.25rem; font-weight: 500; }
+  p { color: var(--mute); margin-bottom: .75rem; }
+  iframe { width: 100%; border: 0; display: block; margin-top: .5rem; }
+</style>

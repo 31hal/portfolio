@@ -1,0 +1,26 @@
+---
+import Base from '../layouts/Base.astro';
+// プロフィール写真を使うときは public/photos/ に入れ、ファイル名をここに書きます。
+const photo = '';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+<Base title="Profile">
+  <main class="page">
+    <h1 class="title">Profile</h1>
+    <div class="wrap">
+      <div class="text prose">
+        <p>新潟県在住。大学で工学を学びながら、写真表現を中心に個人制作を行っています。ポートレートやスナップを主軸に、被写体や空間の持つ雰囲気を丁寧に捉えることを意識しています。</p>
+        <p>現在は、撮影技術や表現の基礎を磨きつつ、記録性と視覚的な印象の両立をテーマに制作を続けています。</p>
+      </div>
+      {photo
+        ? <img class="ph pic" src={`${base}/photos/${photo}`} alt="プロフィール写真" />
+        : <div class="ph pic" style="--a:#c9ccd1;--b:#8d97a8"></div>}
+    </div>
+  </main>
+</Base>
+
+<style>
+  .wrap { display: grid; gap: 2rem; }
+  .pic { aspect-ratio: 4 / 5; max-width: 320px; object-fit: cover; }
+  @media (min-width: 720px) { .wrap { grid-template-columns: 1fr 320px; align-items: start; gap: 4rem; } }
+</style>
