@@ -1,16 +1,71 @@
 ---
+import Base from '../layouts/Base.astro';
+import { works } from '../data/works';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const img = (f?: string) => (f ? `${base}/photos/${f}` : '');
 ---
+<Base>
+  <main>
+    <ul>
+      {works.map((w) => (
+        <li>
+          <a
+            href={`${base}/works/${w.slug}/`}
+            data-img={img(w.file)}
+            data-a={w.tones[0]}
+            data-b={w.tones[1]}
+            data-ratio={w.ratio}
+          >
+            <span class="t">{w.title}</span>
+            <span class="m">{w.place}　{w.year}</span>
+            <span class="thumb" style={`aspect-ratio:${w.ratio};--a:${w.tones[0]};--b:${w.tones[1]}`}>
+              {w.file && <img src={img(w.file)} alt={w.title} loading="lazy" />}
+            </span>
+          </a>
+        </li>
+      ))}
+    </ul>
+    <div id="peek" aria-hidden="true"></div>
+  </main>
+</Base>
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<style>
+  main { padding: 2rem clamp(1rem, 4vw, 3rem) 4rem; }
+  ul { list-style: none; padding: 0; }
+  li a { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: .25rem 1rem; padding: .35rem 0; border-top: 1px solid color-mix(in srgb, var(--ink) 18%, transparent); }
+  li:last-child a { border-bottom: 1px solid color-mix(in srgb, var(--ink) 18%, transparent); }
+  .t { font-size: clamp(2.5rem, 11vw, 9rem); line-height: 1.05; letter-spacing: -.02em; font-weight: 300; transition: letter-spacing .35s, font-weight .35s; }
+  .m { font-size: .875rem; color: var(--mute); }
+  li a:hover .t, li a:focus-visible .t { letter-spacing: .04em; font-weight: 500; }
+  .thumb { display: none; width: 100%; margin: .5rem 0 1rem; background: linear-gradient(160deg, var(--a), var(--b)); overflow: hidden; }
+  .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  #peek { position: fixed; left: 0; top: 0; width: min(28vw, 360px); pointer-events: none; opacity: 0; transition: opacity .2s; background-size: cover; background-position: center; z-index: 5; }
+  #peek.on { opacity: 1; }
+  @media (hover: none) { .thumb { display: block; } #peek { display: none; } }
+</style>
+
+<script>
+  const peek = document.getElementById('peek') as HTMLElement;
+  const links = document.querySelectorAll<HTMLElement>('li a');
+  let x = 0, y = 0, cx = 0, cy = 0, raf = 0;
+  const tick = () => {
+    cx += (x - cx) * 0.15; cy += (y - cy) * 0.15;
+    peek.style.transform = `translate(${cx + 24}px, ${cy - peek.offsetHeight / 2}px)`;
+    raf = requestAnimationFrame(tick);
+  };
+  window.addEventListener('pointermove', (e) => { x = e.clientX; y = e.clientY; });
+  links.forEach((a) => {
+    const show = () => {
+      const d = a.dataset;
+      peek.style.aspectRatio = d.ratio || '3 / 2';
+      peek.style.backgroundImage = d.img ? `url(${d.img})` : `linear-gradient(160deg, ${d.a}, ${d.b})`;
+      peek.classList.add('on');
+      cancelAnimationFrame(raf); cx = x; cy = y; tick();
+    };
+    const hide = () => { peek.classList.remove('on'); cancelAnimationFrame(raf); };
+    a.addEventListener('pointerenter', show);
+    a.addEventListener('pointerleave', hide);
+    a.addEventListener('focus', show);
+    a.addEventListener('blur', hide);
+  });
+</script>
